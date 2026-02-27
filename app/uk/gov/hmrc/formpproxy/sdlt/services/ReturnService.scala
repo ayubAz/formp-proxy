@@ -35,8 +35,11 @@ class ReturnService @Inject() (repo: SdltFormpRepository) {
   def getSDLTReturn(returnResourceRef: String, storn: String): Future[GetReturnRequest] =
     repo.sdltGetReturn(returnResourceRef = returnResourceRef, storn = storn)
 
-  def getSDLTReturns(request: GetReturnRecordsRequest): Future[SdltReturnRecordResponse] =
-    repo.sdltGetReturns(request)
+  def getSDLTReturns(request: GetReturnRecordsRequest): Future[SdltReturnRecordResponse] = {
+    val (sortField, sortOrder) = getSortingForType(request.pageType, request.deletionFlag)
+    val requestWithSorting     = request.copy(sortingField = Some(sortField), sortingOrder = Some(sortOrder))
+    repo.sdltGetReturns(requestWithSorting)
+  }
 
   def createVendor(req: CreateVendorRequest): Future[CreateVendorReturn] =
     repo.sdltCreateVendor(req)
@@ -89,4 +92,11 @@ class ReturnService @Inject() (repo: SdltFormpRepository) {
   def updateReturn(request: UpdateReturnRequest): Future[UpdateReturnReturn] =
     repo.sdltUpdateReturn(request)
 
+  private def getSortingForType(pageType: Option[String], deletionFlag: Boolean): (String, String) =
+    (pageType.map(_.trim.toUpperCase), deletionFlag) match {
+      case (Some("IN-PROGRESS"),                    false) => ("ret.last_update_date", "DESC")
+      case (Some("SUBMITTED"),                      false) => ("submitted_date",       "DESC")
+      case (Some("IN-PROGRESS") | Some("SUBMITTED"), true) => ("ret.purge_date",        "ASC")
+      case _                                               => ("1",                     "ASC")
+    }
 }

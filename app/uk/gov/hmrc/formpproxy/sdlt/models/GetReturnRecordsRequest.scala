@@ -23,7 +23,9 @@ case class GetReturnRecordsRequest(
   status: Option[String],
   deletionFlag: Boolean,
   pageType: Option[String],
-  pageNumber: Option[String]
+  pageNumber: Option[String],
+  sortingField: Option[String] = None,
+  sortingOrder: Option[String] = None
 )
 
 object GetReturnRecordsRequest {
