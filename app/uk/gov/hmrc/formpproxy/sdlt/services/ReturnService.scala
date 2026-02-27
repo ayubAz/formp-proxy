@@ -23,6 +23,7 @@ import uk.gov.hmrc.formpproxy.sdlt.models.vendor.*
 import uk.gov.hmrc.formpproxy.sdlt.models.purchaser.*
 import uk.gov.hmrc.formpproxy.sdlt.models.land.*
 import uk.gov.hmrc.formpproxy.sdlt.repositories.SdltFormpRepository
+import uk.gov.hmrc.formpproxy.sdlt.models.GetReturnRecordsRequest._
 
 import javax.inject.Inject
 import scala.concurrent.Future
@@ -36,9 +37,7 @@ class ReturnService @Inject() (repo: SdltFormpRepository) {
     repo.sdltGetReturn(returnResourceRef = returnResourceRef, storn = storn)
 
   def getSDLTReturns(request: GetReturnRecordsRequest): Future[SdltReturnRecordResponse] = {
-    val (sortField, sortOrder) = getSortingForType(request.pageType, request.deletionFlag)
-    val requestWithSorting     = request.copy(sortingField = Some(sortField), sortingOrder = Some(sortOrder))
-    repo.sdltGetReturns(requestWithSorting)
+    repo.sdltGetReturns(sortReturns(request))
   }
 
   def createVendor(req: CreateVendorRequest): Future[CreateVendorReturn] =
@@ -91,12 +90,4 @@ class ReturnService @Inject() (repo: SdltFormpRepository) {
 
   def updateReturn(request: UpdateReturnRequest): Future[UpdateReturnReturn] =
     repo.sdltUpdateReturn(request)
-
-  private def getSortingForType(pageType: Option[String], deletionFlag: Boolean): (String, String) =
-    (pageType.map(_.trim.toUpperCase), deletionFlag) match {
-      case (Some("IN-PROGRESS"),                    false) => ("ret.last_update_date", "DESC")
-      case (Some("SUBMITTED"),                      false) => ("submitted_date",       "DESC")
-      case (Some("IN-PROGRESS") | Some("SUBMITTED"), true) => ("ret.purge_date",        "ASC")
-      case _                                               => ("1",                     "ASC")
-    }
 }

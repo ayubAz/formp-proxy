@@ -30,4 +30,16 @@ case class GetReturnRecordsRequest(
 
 object GetReturnRecordsRequest {
   implicit val format: OFormat[GetReturnRecordsRequest] = Json.format[GetReturnRecordsRequest]
+
+  def sortReturns(request: GetReturnRecordsRequest): GetReturnRecordsRequest = {
+
+    val (sortField, sortOrder) = (request.pageType.map(_.trim.toUpperCase), request.deletionFlag) match {
+      case (Some("IN-PROGRESS"), false) => ("ret.last_update_date", "DESC")
+      case (Some("SUBMITTED"), false) => ("submitted_date", "DESC")
+      case (Some("IN-PROGRESS") | Some("SUBMITTED"), true) => ("ret.purge_date", "ASC")
+      case _ => ("1", "ASC")
+    }
+
+    request.copy(sortingField = Some(sortField), sortingOrder = Some(sortOrder))
+  }
 }
