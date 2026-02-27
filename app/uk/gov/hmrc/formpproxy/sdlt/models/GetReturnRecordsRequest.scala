@@ -27,14 +27,14 @@ case class GetReturnRecordsRequest(
 ) {
 
   def sortSpec: (String, String) =
-    val (orderBy, order) = (pageType.map(_.trim.toUpperCase), deletionFlag) match {
+    val (order, orderBy) = (pageType.map(_.trim.toUpperCase), deletionFlag) match {
       case (Some("IN-PROGRESS"),                    false) => ("ret.last_update_date", "DESC")
       case (Some("SUBMITTED"),                      false) => ("submitted_date",       "DESC")
       case (Some("IN-PROGRESS") | Some("SUBMITTED"), true) => ("ret.purge_date",        "ASC")
       case _                                               => ("1",                     "ASC")
     }
 
-    (orderBy, order)
+    (order, orderBy)
 }
 
 object GetReturnRecordsRequest {
