@@ -26,7 +26,7 @@ import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{ControllerComponents, PlayBodyParsers, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import uk.gov.hmrc.formpproxy.actions.{AuthAction, FakeAuthAction}
+import uk.gov.hmrc.formpproxy.actions.{ApiKeyAction, AuthAction, FakeApiKeyAction, FakeAuthAction}
 import uk.gov.hmrc.formpproxy.sdlt.controllers.returns.ChrisSubmissionController
 import uk.gov.hmrc.formpproxy.sdlt.models.submission.*
 import uk.gov.hmrc.formpproxy.sdlt.services.submission.ChrisSubmissionService
@@ -1098,9 +1098,10 @@ class ChrisSubmissionControllerSpec extends AnyFreeSpec with Matchers with Scala
     private val cc: ControllerComponents = stubControllerComponents()
     private val parsers: PlayBodyParsers = cc.parsers
     private def fakeAuth: AuthAction     = new FakeAuthAction(parsers)
+    private def fakeApiKey: ApiKeyAction = new FakeApiKeyAction(parsers)
 
     val mockService: ChrisSubmissionService = mock[ChrisSubmissionService]
-    val controller                          = new ChrisSubmissionController(fakeAuth, mockService, cc)
+    val controller                          = new ChrisSubmissionController(fakeAuth, fakeApiKey, mockService, cc)
 
     def makeJsonRequest(body: JsValue): FakeRequest[JsValue] =
       FakeRequest(POST, "/formp-proxy/sdlt/submission")
